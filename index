@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CACCIA+ | Soluciones Integrales</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              caccia: {
+                blue: '#002654', // Deep Navy Blue
+                dark: '#001a3d', // Darker shade for gradient
+                yellow: '#FFC700', // Bright Yellow
+              }
+            },
+            fontFamily: {
+              sans: ['Inter', 'system-ui', 'sans-serif'],
+            },
+            animation: {
+              'fade-in': 'fadeIn 0.5s ease-out forwards',
+              'fade-in-up': 'fadeInUp 0.6s ease-out forwards',
+              'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+            }
+          }
+        }
+      }
+    </script>
+
+    <!-- React & ReactDOM (UMD) -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    
+    <!-- Babel Standalone (allows JSX in browser) -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <!-- Google Fonts -->
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+      /* Custom animations */
+      @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+      }
+      
+      @keyframes fadeInUp {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+
+      /* Technical Grid Background Pattern */
+      .bg-grid-pattern {
+        background-size: 40px 40px;
+        background-image: linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+                          linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+      }
+    </style>
+<script type="importmap">
+{
+  "imports": {
+    "react/": "https://aistudiocdn.com/react@^19.2.0/",
+    "react": "https://aistudiocdn.com/react@^19.2.0",
+    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/",
+    "lucide-react": "https://aistudiocdn.com/lucide-react@^0.555.0"
+  }
+}
+</script>
+</head>
+<body class="bg-caccia-blue text-white antialiased selection:bg-caccia-yellow selection:text-caccia-blue">
+    <div id="root"></div>
+
+    <script type="text/babel">
+      const { useState, useEffect } = React;
+
+      // --- ICONOS (SVG Components) ---
+      // Reemplazo de Lucide para evitar dependencias externas complejas en un solo archivo
+      const IconBase = ({ d, className = "w-6 h-6" }) => (
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+            {d}
+        </svg>
+      );
+
+      const Icons = {
+        ChevronRight: (props) => <IconBase {...props} d={<path d="m9 18 6-6-6-6"/>} />,
+        FileText: (props) => <IconBase {...props} d={<><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/></>} />,
+        ShoppingBag: (props) => <IconBase {...props} d={<><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></>} />,
+        ArrowLeft: (props) => <IconBase {...props} d={<path d="m12 19-7-7 7-7"/><path d="M19 12H5"/>} />,
+        Send: (props) => <IconBase {...props} d={<><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></>} />,
+        CheckCircle: (props) => <IconBase {...props} d={<><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></>} />,
+        Loader2: ({ className }) => <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>,
+        Building2: (props) => <IconBase {...props} d={<><path d="M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18Z"/><path d="M6 12H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2"/><path d="M18 9h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-2"/><path d="M10 6h4"/><path d="M10 10h4"/><path d="M10 14h4"/><path d="M10 18h4"/></>} />,
+        User: (props) => <IconBase {...props} d={<><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></>} />,
+        Mail: (props) => <IconBase {...props} d={<><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></>} />,
+        QrCode: (props) => <IconBase {...props} d={<><rect width="5" height="5" x="3" y="3" rx="1"/><rect width="5" height="5" x="14" y="3" rx="1"/><rect width="5" height="5" x="3" y="14" rx="1"/><path d="M21 16h-3a2 2 0 0 0-2 2v3"/><path d="M21 21v.01"/><path d="M12 7v3a2 2 0 0 1-2 2H7"/><path d="M3 12h.01"/><path d="M12 3h.01"/><path d="M12 16v.01"/><path d="M16 12h1"/><path d="M21 12v.01"/><path d="M12 21v-1"/></>} />,
+        MessageSquareText: (props) => <IconBase {...props} d={<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>} />,
+        WhatsApp: () => (
+          <svg viewBox="0 0 24 24" fill="currentColor" className="w-full h-full">
+            <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.008-.57-.008-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+          </svg>
+        )
+      };
+
+      // --- COMPONENTS ---
+
+      // 1. Logo
+      const Logo = ({ className = '', size = 'lg' }) => {
+        const textSize = {
+          sm: 'text-3xl',
+          md: 'text-5xl',
+          lg: 'text-7xl',
+        };
+
+        return (
+          <div className={`font-extrabold tracking-tight flex items-center justify-center select-none ${textSize[size]} ${className}`}>
+            <span className="text-white">CACCIA</span>
+            <span className="text-caccia-yellow ml-1">+</span>
+          </div>
+        );
+      };
+
+      // 2. ActionButton
+      const ActionButton = ({ 
+        label, 
+        subLabel,
+        icon, 
+        href, 
+        variant = 'primary',
+        onClick 
+      }) => {
+        const baseStyles = "group w-full flex items-center justify-between px-6 py-4 rounded-xl transition-all duration-300 transform border backdrop-blur-sm relative overflow-hidden cursor-pointer";
+        
+        const variants = {
+          primary: "bg-gradient-to-br from-white to-gray-100 border-white/50 text-caccia-blue hover:shadow-lg hover:shadow-white/10 hover:-translate-y-1",
+          secondary: "bg-white/5 border-white/20 text-white hover:bg-white/10 hover:border-white/40 hover:-translate-y-1",
+          whatsapp: "bg-gradient-to-r from-[#25D366] to-[#128C7E] border-transparent text-white hover:shadow-lg hover:shadow-green-500/20 hover:-translate-y-1",
+        };
+
+        return (
+          <a 
+            href={href} 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className={`${baseStyles} ${variants[variant]}`}
+            onClick={onClick}
+          >
+            <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-500 ease-out pointer-events-none"></div>
+
+            <div className="flex items-center gap-4 relative z-10 flex-1">
+              {icon && (
+                <div className={`p-2 rounded-lg shrink-0 ${variant === 'primary' ? 'bg-caccia-blue/10' : 'bg-white/20'}`}>
+                  <span className="text-xl flex items-center justify-center w-6 h-6">{icon}</span>
+                </div>
+              )}
+              <div className="flex flex-col items-start text-left">
+                <span className="font-bold text-base sm:text-lg leading-tight">{label}</span>
+                {subLabel && (
+                  <span className={`text-xs mt-0.5 font-medium ${variant === 'primary' ? 'text-caccia-blue/70' : 'text-white/80'}`}>
+                    {subLabel}
+                  </span>
+                )}
+              </div>
+            </div>
+            <Icons.ChevronRight className={`w-5 h-5 relative z-10 transition-transform group-hover:translate-x-1 shrink-0 ${variant === 'primary' ? 'text-caccia-blue' : 'text-white/80'}`} />
+          </a>
+        );
+      };
+
+      // 3. Form Input Helper (Defined outside to prevent focus loss)
+      const FormInput = ({ icon: Icon, label, ...props }) => (
+        <div className="space-y-1.5 group">
+          <label className="text-xs font-semibold text-gray-300 ml-1 uppercase tracking-wide">{label}</label>
+          <div className="relative">
+            <div className="absolute left-3 top-1/2 -translate-y-1/2 text-caccia-yellow/70 group-focus-within:text-caccia-yellow transition-colors">
+              <Icon className="w-5 h-5" />
+            </div>
+            <input 
+              {...props}
+              className="w-full bg-black/20 border border-white/10 rounded-xl pl-10 pr-4 py-3.5 text-white placeholder-white/20 focus:outline-none focus:border-caccia-yellow/50 focus:bg-black/30 focus:ring-1 focus:ring-caccia-yellow/50 transition-all shadow-inner"
+            />
+          </div>
+        </div>
+      );
+
+      // --- MAIN APP ---
+      const GOOGLE_SCRIPT_URL = "TU_URL_DE_GOOGLE_APPS_SCRIPT_AQUI";
+
+      const App = () => {
+        const [currentView, setCurrentView] = useState('menu'); // 'menu' | 'form' | 'success'
+        const [isLoading, setIsLoading] = useState(false);
+        const [formData, setFormData] = useState({
+          empresa: '',
+          contacto: '',
+          email: '',
+          codigo: ''
+        });
+
+        const handleInputChange = (e) => {
+          const { name, value } = e.target;
+          setFormData(prev => ({ ...prev, [name]: value }));
+        };
+
+        const handleSubmit = async (e) => {
+          e.preventDefault();
+          setIsLoading(true);
+
+          try {
+            // Simulacion de envio.
+            // Aqui puedes descomentar y usar fetch cuando tengas el URL de Apps Script:
+            /*
+            await fetch(GOOGLE_SCRIPT_URL, {
+                method: "POST",
+                mode: "no-cors",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(formData)
+            });
+            */
+            await new Promise(resolve => setTimeout(resolve, 1500));
+            setCurrentView('success');
+          } catch (error) {
+            alert("Hubo un error al enviar. Intenta contactarnos por WhatsApp.");
+          } finally {
+            setIsLoading(false);
+          }
+        };
+
+        const resetApp = () => {
+          setFormData({ empresa: '', contacto: '', email: '', codigo: '' });
+          setCurrentView('menu');
+        };
+
+        return (
+          <main className="min-h-screen bg-gradient-to-br from-caccia-blue via-[#001a3d] to-black flex flex-col items-center justify-center p-4 relative overflow-hidden font-sans">
+            
+            {/* --- Background Effects --- */}
+            <div className="absolute inset-0 bg-grid-pattern opacity-30 pointer-events-none"></div>
+            
+            <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
+              <div className="absolute -top-[10%] -left-[10%] w-[500px] h-[500px] bg-caccia-blue rounded-full blur-[100px] opacity-60 mix-blend-screen animate-pulse-slow"></div>
+              <div className="absolute top-[40%] right-[-10%] w-[300px] h-[300px] bg-caccia-yellow rounded-full blur-[120px] opacity-10"></div>
+            </div>
+
+            {/* --- Main Card Container --- */}
+            <div className="z-10 w-full max-w-lg animate-fade-in-up">
+              
+              <div className="bg-white/5 backdrop-blur-xl border border-white/10 shadow-2xl rounded-3xl p-6 sm:p-8 relative overflow-hidden">
+                
+                {/* Glass Reflection */}
+                <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent"></div>
+
+                {/* Header */}
+                <header className={`flex flex-col items-center gap-2 text-center transition-all duration-500 ${currentView === 'menu' ? 'mb-8' : 'mb-6'}`}>
+                  <Logo size={currentView === 'menu' ? 'lg' : 'md'} />
+                  <div className="h-px w-12 bg-caccia-yellow/50 mt-3 mb-1"></div>
+                  <p className="text-gray-300 text-xs sm:text-sm tracking-[0.3em] uppercase font-medium opacity-80">
+                    Soluciones Integrales
+                  </p>
+                </header>
+
+                {/* --- VIEW: MENU --- */}
+                {currentView === 'menu' && (
+                  <nav className="flex flex-col gap-3 animate-fade-in">
+                    <ActionButton 
+                      label="Solicitar certificado"
+                      subLabel="Obtén el documento de tu equipo"
+                      href="#"
+                      onClick={(e) => { e.preventDefault(); setCurrentView('form'); }}
+                      icon={<Icons.FileText className="w-5 h-5" />}
+                      variant="primary"
+                    />
+                    
+                    {/* Sección de Contacto */}
+                    <div className="mt-8 mb-2">
+                      <h3 className="text-white font-bold text-lg flex items-center gap-2 mb-1">
+                        <Icons.MessageSquareText className="w-5 h-5 text-green-400" />
+                        ¿Tenés alguna duda?
+                      </h3>
+                      <p className="text-white/60 text-sm mb-4">Comunicate con nosotros por WhatsApp:</p>
+                      
+                      <div className="space-y-3">
+                        <ActionButton 
+                          label="Instrumentos de Medición"
+                          subLabel="Consultar con un experto"
+                          href="https://wa.me/541149717053?text=Hola,%20tengo%20una%20consulta%20sobre%20instrumentos%20de%20medición" 
+                          icon={<Icons.WhatsApp />}
+                          variant="whatsapp"
+                        />
+                        <ActionButton 
+                          label="Otros Productos"
+                          subLabel="Juguetes, Bazar, Varios"
+                          href="https://wa.me/5491168927922?text=Hola,%20quisiera%20consultar%20por%20otros%20productos" 
+                          icon={<Icons.WhatsApp />}
+                          variant="whatsapp"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="mt-6 pt-6 border-t border-white/10">
+                      <ActionButton 
+                        label="Ir a Mercado Libre"
+                        subLabel="Ver nuestra tienda oficial"
+                        href="https://www.mercadolibre.com.ar/pagina/caccia?item_id=MLA1526376261&category_id=MLA407128&seller_id=492290794&client=recoview-selleritems&recos_listing=true#origin=upp&component=sellerData&typeSeller=eshop" 
+                        icon={<Icons.ShoppingBag className="w-5 h-5" />}
+                        variant="secondary"
+                      />
+                    </div>
+                  </nav>
+                )}
+
+                {/* --- VIEW: FORM --- */}
+                {currentView === 'form' && (
+                  <div className="animate-fade-in">
+                    <div className="flex items-center mb-6 relative">
+                      <button 
+                        onClick={() => setCurrentView('menu')} 
+                        className="absolute left-0 p-2 -ml-2 text-white/60 hover:text-caccia-yellow hover:bg-white/5 rounded-full transition-all"
+                      >
+                        <Icons.ArrowLeft className="w-5 h-5" />
+                      </button>
+                      <h2 className="w-full text-center text-lg font-bold text-white tracking-wide">Nuevo Certificado</h2>
+                    </div>
+
+                    <form onSubmit={handleSubmit} className="space-y-4">
+                      <FormInput 
+                        icon={Icons.Building2}
+                        label="Empresa"
+                        name="empresa"
+                        value={formData.empresa}
+                        onChange={handleInputChange}
+                        placeholder="Nombre de la empresa"
+                      />
+
+                      <FormInput 
+                        icon={Icons.User}
+                        label="Nombre de contacto"
+                        name="contacto"
+                        required
+                        value={formData.contacto}
+                        onChange={handleInputChange}
+                        placeholder="Su nombre completo"
+                      />
+
+                      <FormInput 
+                        icon={Icons.Mail}
+                        label="Correo electrónico"
+                        type="email"
+                        name="email"
+                        required
+                        value={formData.email}
+                        onChange={handleInputChange}
+                        placeholder="email@empresa.com"
+                      />
+
+                      <div className="pt-2">
+                         <div className="relative group p-1 bg-gradient-to-r from-caccia-yellow/20 via-white/5 to-caccia-yellow/20 rounded-2xl">
+                           <div className="bg-[#0a1e36] rounded-xl p-4 border border-caccia-yellow/20">
+                              <label className="text-xs font-semibold text-caccia-yellow mb-2 block uppercase tracking-wide flex items-center gap-2">
+                                <Icons.QrCode className="w-4 h-4" /> Código de etiqueta
+                              </label>
+                              <input 
+                                type="text" 
+                                name="codigo"
+                                required
+                                value={formData.codigo}
+                                onChange={handleInputChange}
+                                className="w-full bg-black/30 border border-white/10 rounded-lg px-4 py-3 text-white text-lg font-mono tracking-wider placeholder-white/20 focus:outline-none focus:border-caccia-yellow focus:ring-1 focus:ring-caccia-yellow transition-all text-center"
+                                placeholder="202506-CA-XXXX"
+                              />
+                              <div className="mt-3 flex gap-3 items-start bg-caccia-yellow/5 p-2 rounded border border-caccia-yellow/10">
+                                <span className="text-lg">📌</span>
+                                <p className="text-xs text-gray-400 leading-relaxed">
+                                  Busca este código en la etiqueta pegada al instrumento.<br/>
+                                  <span className="text-caccia-yellow/80">Ejemplo: 202506-CA-11111</span>
+                                </p>
+                              </div>
+                           </div>
+                         </div>
+                      </div>
+
+                      <button 
+                        type="submit" 
+                        disabled={isLoading}
+                        className="w-full mt-4 bg-caccia-yellow text-caccia-blue font-bold py-4 rounded-xl hover:bg-[#ffdb4d] hover:shadow-[0_0_20px_rgba(255,199,0,0.3)] transition-all transform active:scale-[0.98] flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed group"
+                      >
+                        {isLoading ? (
+                          <>
+                            <Icons.Loader2 className="w-5 h-5 animate-spin" />
+                            Procesando...
+                          </>
+                        ) : (
+                          <>
+                            <Icons.Send className="w-5 h-5 group-hover:-translate-y-0.5 group-hover:translate-x-0.5 transition-transform" />
+                            Enviar Solicitud
+                          </>
+                        )}
+                      </button>
+                    </form>
+                  </div>
+                )}
+
+                {/* --- VIEW: SUCCESS --- */}
+                {currentView === 'success' && (
+                  <div className="text-center animate-fade-in py-8">
+                    <div className="w-24 h-24 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-6 shadow-[0_0_30px_rgba(34,197,94,0.4)] animate-bounce">
+                      <Icons.CheckCircle className="w-12 h-12 text-white" />
+                    </div>
+                    <h2 className="text-2xl font-bold mb-3 text-white">¡Solicitud Enviada!</h2>
+                    <p className="text-gray-300 mb-8 max-w-xs mx-auto text-sm leading-relaxed">
+                      Hemos recibido tu información. El certificado será enviado a tu correo electrónico en las próximas 24 horas.
+                    </p>
+                    <button 
+                      onClick={resetApp}
+                      className="px-8 py-3 bg-white/10 border border-white/20 text-white font-semibold rounded-full hover:bg-white hover:text-caccia-blue transition-all"
+                    >
+                      Volver al inicio
+                    </button>
+                  </div>
+                )}
+
+              </div>
+
+              {/* Footer */}
+              {currentView !== 'form' && (
+                <footer className="mt-8 text-center">
+                   <p className="text-white/30 text-[10px] uppercase tracking-widest hover:text-white/50 transition-colors cursor-default">
+                    © {new Date().getFullYear()} Caccia Plus Importaciones
+                  </p>
+                </footer>
+              )}
+            </div>
+          </main>
+        );
+      }
+
+      const root = ReactDOM.createRoot(document.getElementById('root'));
+      root.render(<App />);
+    </script>
+</body>
+</html>
