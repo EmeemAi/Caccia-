@@ -183,11 +183,7 @@
 
       // --- 3. APP PRINCIPAL ---
       
-      // =========================================================================
-      // IMPORTANTE: REEMPLAZA ESTA URL CON LA QUE TE DIO GOOGLE APPS SCRIPT
-      // EJEMPLO: "https://script.google.com/macros/s/AKfycbx.../exec"
-      // =========================================================================
-      const GOOGLE_SCRIPT_URL = https://script.google.com/macros/s/AKfycbwxlmhbYMKOBi_Ms8WE4Yw2s84eaHwotZB3k-qrBJbCWP4JxUxRX76MEei68hVicap9zA/exec;
+      const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwxlmhbYMKOBi_Ms8WE4Yw2s84eaHwotZB3k-qrBJbCWP4JxUxRX76MEei68hVicap9zA/exec";
 
       const App = () => {
         const [currentView, setCurrentView] = useState('menu'); // 'menu' | 'form' | 'success'
@@ -207,11 +203,6 @@
         const handleSubmit = async (e) => {
           e.preventDefault();
           
-          if (GOOGLE_SCRIPT_URL.includes("PEGAR_AQUI")) {
-            alert("Falta configurar la URL de Google Script en el código.");
-            return;
-          }
-
           setIsLoading(true);
 
           try {
