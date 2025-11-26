@@ -183,7 +183,11 @@
 
       // --- 3. APP PRINCIPAL ---
       
-      const GOOGLE_SCRIPT_URL = "TU_URL_DE_GOOGLE_APPS_SCRIPT_AQUI";
+      // =========================================================================
+      // IMPORTANTE: REEMPLAZA ESTA URL CON LA QUE TE DIO GOOGLE APPS SCRIPT
+      // EJEMPLO: "https://script.google.com/macros/s/AKfycbx.../exec"
+      // =========================================================================
+      const GOOGLE_SCRIPT_URL = https://script.google.com/macros/s/AKfycbwxlmhbYMKOBi_Ms8WE4Yw2s84eaHwotZB3k-qrBJbCWP4JxUxRX76MEei68hVicap9zA/exec;
 
       const App = () => {
         const [currentView, setCurrentView] = useState('menu'); // 'menu' | 'form' | 'success'
@@ -202,14 +206,34 @@
 
         const handleSubmit = async (e) => {
           e.preventDefault();
+          
+          if (GOOGLE_SCRIPT_URL.includes("PEGAR_AQUI")) {
+            alert("Falta configurar la URL de Google Script en el código.");
+            return;
+          }
+
           setIsLoading(true);
 
           try {
-            // Simulación
-            await new Promise(resolve => setTimeout(resolve, 1500));
+            // Enviamos los datos a Google Script
+            // Usamos mode: 'no-cors' para evitar errores de seguridad del navegador.
+            // Esto significa que no podremos leer la respuesta (si fue 'success'),
+            // pero si no da error de red, asumimos que llegó bien.
+            await fetch(GOOGLE_SCRIPT_URL, {
+              method: 'POST',
+              mode: 'no-cors',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify(formData)
+            });
+
+            // Si pasa el fetch sin tirar error de red, asumimos éxito
             setCurrentView('success');
+            
           } catch (error) {
-            alert("Hubo un error al enviar. Intenta contactarnos por WhatsApp.");
+            console.error(error);
+            alert("Hubo un error de conexión. Por favor intenta contactarnos por WhatsApp.");
           } finally {
             setIsLoading(false);
           }
