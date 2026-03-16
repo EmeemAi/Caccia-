@@ -111,14 +111,24 @@
 
       // Logo
       const Logo = ({ className = '', size = 'lg' }) => {
-        const textSize = {
-          sm: 'text-3xl',
-          md: 'text-5xl',
-          lg: 'text-7xl',
+        const sizes = {
+          sm: 'h-12',
+          md: 'h-20',
+          lg: 'h-32',
         };
         return (
-          <div className={`font-extrabold tracking-tight flex items-center justify-center select-none ${textSize[size]} ${className}`}>
-            <span className="text-white">SCHWYZ</span>
+          <div className={`flex items-center justify-center select-none ${className}`}>
+            <img 
+              src="/logo.png" 
+              alt="SCHWYZ Logo" 
+              className={`${sizes[size]} w-auto object-contain`}
+              referrerPolicy="no-referrer"
+              style={{ filter: 'brightness(0) invert(1)' }} // Invertir si el logo es negro para que se vea blanco sobre el fondo oscuro
+              onError={(e) => {
+                e.target.style.display = 'none';
+                e.target.parentElement.innerHTML = '<span class="text-white font-extrabold tracking-tight text-5xl">SCHWYZ</span>';
+              }}
+            />
           </div>
         );
       };
