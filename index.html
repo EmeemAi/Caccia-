@@ -126,6 +126,7 @@
             
             const variants = {
                 primary: "bg-gradient-to-br from-white to-gray-100 border-white/50 text-[#002654] hover:shadow-lg hover:shadow-white/10 hover:-translate-y-1",
+                cta: "bg-white border-[#FFC700]/30 text-[#002654] hover:shadow-lg hover:shadow-white/10 hover:-translate-y-1 hover:border-[#FFC700]/60",
                 secondary: "bg-white/5 border-white/20 text-white hover:bg-white/10 hover:border-white/40 hover:-translate-y-1",
                 whatsapp: "bg-gradient-to-r from-[#25D366] to-[#128C7E] border-transparent text-white hover:shadow-lg hover:shadow-green-500/20 hover:-translate-y-1",
             };
@@ -133,8 +134,8 @@
             return (
                 <a 
                     href={href} 
-                    target="_blank" 
-                    rel="noopener noreferrer"
+                    target={href === '#' ? undefined : "_blank"} 
+                    rel={href === '#' ? undefined : "noopener noreferrer"}
                     className={`${baseStyles} ${variants[variant]}`}
                     onClick={onClick}
                 >
@@ -142,20 +143,20 @@
 
                     <div className="flex items-center gap-4 relative z-10 flex-1">
                         {iconName && (
-                            <div className={`p-2 rounded-lg shrink-0 ${variant === 'primary' ? 'bg-[#002654]/10' : 'bg-white/20'} flex items-center justify-center`}>
+                            <div className={`p-2 rounded-lg shrink-0 ${variant === 'primary' || variant === 'cta' ? 'bg-[#002654]/10' : 'bg-white/20'} flex items-center justify-center`}>
                                 <Icon name={iconName} className="w-5 h-5" />
                             </div>
                         )}
                         <div className="flex flex-col items-start text-left">
                             <span className="font-bold text-base sm:text-lg leading-tight">{label}</span>
                             {subLabel && (
-                                <span className={`text-xs mt-0.5 font-medium ${variant === 'primary' ? 'text-[#002654]/70' : 'text-white/80'}`}>
+                                <span className={`text-xs mt-0.5 font-medium ${variant === 'primary' || variant === 'cta' ? 'text-[#002654]/70' : 'text-white/80'}`}>
                                     {subLabel}
                                 </span>
                             )}
                         </div>
                     </div>
-                    <div className={`transition-transform group-hover:translate-x-1 shrink-0 ${variant === 'primary' ? 'text-[#002654]' : 'text-white/80'}`}>
+                    <div className={`transition-transform group-hover:translate-x-1 shrink-0 ${variant === 'primary' || variant === 'cta' ? 'text-[#002654]' : 'text-white/80'}`}>
                         <Icon name="chevron-right" className="w-5 h-5" />
                     </div>
                 </a>
@@ -248,24 +249,33 @@
                             </header>
 
                             {currentView === 'menu' && (
-                                <nav className="flex flex-col gap-3 animate-fade-in">
+                                <nav className="flex flex-col gap-6 animate-fade-in">
+                                    <div className="text-center space-y-2">
+                                        <h2 className="text-xl font-bold text-white tracking-tight">Solicitud de Certificado</h2>
+                                        <p className="text-gray-400 text-sm px-4 leading-relaxed">
+                                            Completa el formulario para recibir tu certificado oficial.
+                                        </p>
+                                    </div>
+
                                     <ActionButton 
                                         label="Solicitar certificado"
                                         subLabel="Obtén el documento de tu equipo"
                                         href="#"
                                         onClick={(e) => { e.preventDefault(); setCurrentView('form'); }}
                                         iconName="file-text"
-                                        variant="primary"
+                                        variant="cta"
                                     />
                                     
-                                    <div className="mt-4 pt-6 border-t border-white/10">
-                                        <ActionButton 
-                                            label="Ir a nuestra página web"
-                                            subLabel="Visita nuestro sitio oficial"
+                                    <div className="flex flex-col items-center pt-4 border-t border-white/5">
+                                        <a 
                                             href="https://schwyz.com.ar/" 
-                                            iconName="shopping-bag"
-                                            variant="secondary"
-                                        />
+                                            target="_blank" 
+                                            rel="noopener noreferrer"
+                                            className="group flex items-center gap-2 text-white/40 hover:text-white transition-all duration-300 text-sm"
+                                        >
+                                            <Icon name="external-link" size={14} className="opacity-50 group-hover:opacity-100 group-hover:scale-110 transition-all" />
+                                            <span className="font-medium">Visitar sitio web oficial</span>
+                                        </a>
                                     </div>
                                 </nav>
                             )}
