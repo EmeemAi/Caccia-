@@ -224,6 +224,14 @@
                 e.preventDefault();
                 setIsLoading(true);
 
+                // Mapeamos el nombre interno al nombre que espera el Script de Google
+                const payload = {
+                    empresa: formData.empresa,
+                    contacto: formData.contacto,
+                    email: formData.email,
+                    codigo: formData.tag_id_instrumento
+                };
+
                 try {
                     await fetch(GOOGLE_SCRIPT_URL, {
                         method: 'POST',
@@ -231,7 +239,7 @@
                         headers: {
                             'Content-Type': 'application/json',
                         },
-                        body: JSON.stringify(formData)
+                        body: JSON.stringify(payload)
                     });
                     setCurrentView('success');
                 } catch (error) {
